@@ -1,0 +1,1147 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>直播经营复盘工作台</title>
+<script src="./vendor/xlsx.full.min.js"></script>
+<script src="./vendor/jszip.min.js"></script>
+<style>
+:root{--bg:#f4f6f9;--panel:#fff;--ink:#182230;--muted:#667085;--line:#d9e0ea;--dark:#111827;--blue:#1f6feb;--green:#0f9f6e;--amber:#b7791f;--red:#c2410c;--pink:#c02662;--cyan:#087f9c}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;letter-spacing:0}
+header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}.wrap{max-width:1380px;margin:0 auto;padding:16px 22px}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{display:flex;align-items:center;gap:13px}.mark{width:40px;height:40px;border-radius:7px;background:var(--dark);color:#fff;display:grid;place-items:center;font-weight:800}.title h1{font-size:23px;margin:0}.sub{font-size:13px;color:var(--muted);margin-top:3px}.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:#fff;border-radius:6px;padding:8px 11px;font-size:13px;cursor:pointer}.btn.primary{background:var(--dark);border-color:var(--dark);color:#fff}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.tab{border:1px solid var(--line);background:#fff;border-radius:6px;padding:8px 12px;font-size:14px;cursor:pointer}.tab.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+main{max-width:1380px;margin:0 auto;padding:18px 22px 44px}section{display:none}section.active{display:block}.panel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:15px;box-shadow:0 1px 2px rgba(16,24,40,.04)}.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.mt{margin-top:12px}
+h2{font-size:17px;margin:0 0 12px}h3{font-size:14px;margin:0 0 9px;color:#364152}.kpi .label{font-size:12px;color:var(--muted)}.kpi .value{font-size:28px;font-weight:780;margin:7px 0 2px}.kpi .delta{font-size:12px;color:var(--muted)}
+#drop{border:2px dashed #b8c2d6;border-radius:9px;background:#fff;padding:32px;text-align:center;cursor:pointer}.drop-title{font-size:18px;font-weight:750}.drop-hint{color:var(--muted);font-size:13px;margin-top:6px}.drop-sub{margin-top:13px;font-size:12px;color:#3b4863}.file-chip{display:inline-block;background:#eef4ff;color:#214f9b;border-radius:999px;padding:4px 9px;margin:3px}
+.status{font-size:13px;color:var(--muted);margin:10px 0}.badge{display:inline-block;border-radius:999px;padding:3px 8px;font-size:12px;margin:2px;border:1px solid var(--line);background:#fbfcff;white-space:nowrap}.badge.xhs{background:#fff0f3;color:#b42318;border-color:#ffd1d9}.badge.dy{background:#eef6ff;color:#175cd3;border-color:#c6dbff}.badge.warn{background:#fff7ed;color:#9a3412;border-color:#fed7aa}.badge.ok{background:#ecfdf3;color:#027a48;border-color:#abefc6}.badge.risk{background:#fff1f0;color:#b42318;border-color:#fecdca}.badge.info{background:#eff6ff;color:#175cd3;border-color:#c6dbff}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid var(--line);padding:9px 7px;text-align:left;vertical-align:top}th{background:#f7f9fc;color:#475467}.table-wrap{overflow:auto}
+.barrow{display:grid;grid-template-columns:150px 1fr 74px;gap:10px;align-items:center;margin:9px 0;font-size:13px}.bar{height:12px;background:#eef2f7;border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--blue)}
+.audience-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.audience-grid .panel:first-child{grid-column:1/-1}
+.rank-session{border-top:1px solid var(--line);padding:12px 0}.rank-session:first-of-type{border-top:0;padding-top:0}.rank-session:last-child{padding-bottom:0}
+.rank-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}.rank-title{font-weight:750;font-size:13px}.rank-meta{font-size:12px;color:var(--muted);white-space:nowrap}.rank-summary{font-size:13px;color:#344054;margin-bottom:8px;line-height:1.45}
+.rank-row{display:grid;grid-template-columns:minmax(100px,150px) 1fr 82px 58px;gap:9px;align-items:center;margin:7px 0;font-size:12px}.rank-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rank-no{display:inline-grid;place-items:center;width:19px;height:19px;border-radius:50%;background:#eef4ff;color:#175cd3;font-size:11px;font-weight:750;margin-right:6px}.rank-value{text-align:right;font-weight:720;white-space:nowrap}.rank-sub{text-align:right;color:var(--muted);white-space:nowrap}
+.lead-rank-row{grid-template-columns:minmax(190px,1.6fr) 1fr 82px 62px 62px}.lead-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lead-date{font-size:11px;color:var(--muted);white-space:nowrap}
+.chart{height:250px;position:relative;border-left:1px solid var(--line);border-bottom:1px solid var(--line);padding:8px 8px 30px;display:flex;align-items:flex-end;gap:9px}.col{flex:1;min-width:28px;background:linear-gradient(180deg,var(--blue),#7aa7ff);border-radius:5px 5px 0 0;position:relative}.col span{position:absolute;bottom:-25px;left:50%;transform:translateX(-50%) rotate(-24deg);font-size:10px;color:var(--muted);white-space:nowrap}.col b{position:absolute;top:-19px;left:50%;transform:translateX(-50%);font-size:10px;white-space:nowrap}
+.diag{border-left:4px solid var(--amber);background:#fff8eb;padding:10px 12px;border-radius:6px;margin:8px 0;font-size:13px}.diag.risk{border-color:var(--red);background:#fff1f0}.diag.ok{border-color:var(--green);background:#ecfdf3}.diag.info{border-color:var(--blue);background:#eff6ff}.empty{padding:24px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:8px}.small{font-size:12px;color:var(--muted);line-height:1.6}.note{font-size:12px;line-height:1.55;color:#475467}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+textarea{width:100%;min-height:140px;border:1px solid var(--line);border-radius:8px;padding:10px;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#344054;background:#fbfcff}
+@media(max-width:980px){.grid4,.grid3,.grid2,.audience-grid{grid-template-columns:1fr}.audience-grid .panel:first-child{grid-column:auto}.wrap,main{padding-left:14px;padding-right:14px}.topline{align-items:flex-start;flex-direction:column}.chart{overflow-x:auto}.rank-row,.lead-rank-row{grid-template-columns:minmax(0,1fr) 92px}.rank-row .bar,.lead-rank-row .bar{grid-column:1/-1;grid-row:2}.rank-sub,.lead-date{display:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="topline">
+    <div class="brand"><div class="mark">LIVE</div><div class="title"><h1>直播经营复盘工作台</h1><div class="sub">小红书直播 / 抖音直播 · 本地吸收 zip、拆表、归类、对比、生成周会讲法</div></div></div>
+    <div class="top-actions"><button class="btn" id="loadDemo">载入小红书样例</button><button class="btn" id="clearAll">清空</button><button class="btn primary" id="exportJson">导出 JSON</button></div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="import">导入体检</button>
+    <button class="tab" data-tab="weekly">周会总览</button>
+    <button class="tab" data-tab="xhs">小红书直播</button>
+    <button class="tab" data-tab="douyin">抖音直播</button>
+    <button class="tab" data-tab="products">商品结构</button>
+    <button class="tab" data-tab="traffic">流量结构</button>
+    <button class="tab" data-tab="audience">人群画像</button>
+    <button class="tab" data-tab="content">内容引流</button>
+    <button class="tab" data-tab="raw">拆表明细</button>
+    <button class="tab" data-tab="compare">多场对比</button>
+    <button class="tab" data-tab="actions">会议输出</button>
+  </div>
+</div></header>
+<main>
+  <section id="import" class="active">
+    <div id="drop"><div class="drop-title">拖入每场直播的 zip / Excel</div><div class="drop-hint">支持多个文件；浏览器本地解包，不上传。会自动合并同一场拆出的买手中心、数据概览、商品、流量、人群表。</div><div class="drop-sub"><span class="file-chip">小红书直播后台 zip</span><span class="file-chip">抖音直播后台 zip</span><span class="file-chip">Excel 多表工作簿</span><span class="file-chip">自动跳过抽奖通讯信息</span></div><input id="file" type="file" multiple accept=".zip,.xlsx,.xls" hidden></div>
+    <div id="status" class="status"></div>
+    <div id="importReport" class="mt"></div>
+  </section>
+  <section id="weekly"><div id="weeklyView"></div></section>
+  <section id="xhs"><div id="xhsView"></div></section>
+  <section id="douyin"><div id="douyinView"></div></section>
+  <section id="products"><div id="productsView"></div></section>
+  <section id="traffic"><div id="trafficView"></div></section>
+  <section id="audience"><div id="audienceView"></div></section>
+  <section id="content"><div id="contentView"></div></section>
+  <section id="raw"><div id="rawView"></div></section>
+  <section id="compare"><div id="compareView"></div></section>
+  <section id="actions"><div id="actionsView"></div></section>
+</main>
+<script>
+const METRIC_DEFS = {
+  exposure: {
+    label: "曝光",
+    aliases: ["直播间曝光人数", "曝光人数", "impressions", "live impressions", "exposure"],
+  },
+  coverClickRate: {
+    label: "封面点击率",
+    aliases: ["封面点击率", "点击率", "cover ctr", "ctr"],
+    percent: true,
+  },
+  viewers: {
+    label: "看播UV",
+    aliases: ["直播间观看人数", "观看人数", "看播人数", "viewers", "unique viewers", "uv"],
+  },
+  views: {
+    label: "场观",
+    aliases: ["直播间观看次数", "观看次数", "场观", "views", "live views"],
+  },
+  avgWatchSeconds: {
+    label: "平均停留秒",
+    aliases: ["人均观看时长(秒)", "人均停留时长(秒)", "平均停留时长", "avg watch time", "average watch time"],
+  },
+  interactions: {
+    label: "互动人数",
+    aliases: ["互动人数", "互动用户数", "engaged viewers", "interactions"],
+  },
+  engagementRate: {
+    label: "互动率",
+    aliases: ["观看-互动率(人数)", "互动率", "engagement rate"],
+    percent: true,
+  },
+  avgOnline: {
+    label: "平均在线",
+    aliases: ["平均在线人数", "avg online", "average online viewers"],
+  },
+  gmv: {
+    label: "GMV",
+    aliases: ["支付金额", "成交金额", "支付金额（商家实收)", "支付金额（商家实收）", "gmv", "paid amount", "sales amount"],
+  },
+  buyers: {
+    label: "支付人数",
+    aliases: ["支付人数", "购买人数", "buyers", "paying users"],
+  },
+  orders: {
+    label: "支付订单",
+    aliases: ["支付订单数", "订单数", "orders", "paid orders"],
+  },
+  aov: {
+    label: "客单价",
+    aliases: ["客单价", "aov", "average order value"],
+  },
+  fans: {
+    label: "涨粉",
+    aliases: ["新增粉丝人数", "涨粉", "new followers", "followers gained"],
+  },
+  productClicks: {
+    label: "商品点击",
+    aliases: ["商品点击人数", "商品点击次数", "商品浏览人数", "商品浏览次数", "商详浏览次数", "product clicks", "click product"],
+  },
+  productExposure: {
+    label: "商品曝光",
+    aliases: ["商品曝光人数", "商品曝光次数", "product impressions", "product exposure"],
+  },
+  likes: {
+    label: "点赞",
+    aliases: ["点赞次数", "点赞人数", "likes"],
+  },
+  comments: {
+    label: "评论",
+    aliases: ["评论次数", "评论人数", "comments"],
+  },
+  firstPurchaseRate: {
+    label: "首购率",
+    aliases: ["首购率", "first purchase rate"],
+    percent: true,
+  },
+  refunds: {
+    label: "退款金额",
+    aliases: ["退款金额", "refund amount", "refunds"],
+  },
+  refundOrders: {
+    label: "退款订单",
+    aliases: ["退款订单数", "refund orders"],
+  },
+  refundUsers: {
+    label: "退款人数",
+    aliases: ["退款人数", "refund users"],
+  },
+  refundRate: {
+    label: "退款率",
+    aliases: ["退款率", "refund rate"],
+    percent: true,
+  },
+};
+
+function normalizeKey(value) {
+  return String(value ?? "")
+    .normalize("NFKC")
+    .replace(/\s+/g, "")
+    .replace(/[()（）]/g, "")
+    .replace(/[：:]/g, "")
+    .toLowerCase();
+}
+
+function toNumber(value) {
+  if (value == null || value === "") return null;
+  const text = String(value).replace(/[,，￥¥%\s]/g, "");
+  const num = Number.parseFloat(text);
+  return Number.isFinite(num) ? num : null;
+}
+
+function asPercent(value) {
+  const num = toNumber(value);
+  if (num == null) return null;
+  const percent = num <= 1 ? num * 100 : num;
+  return Math.round(percent * 100) / 100;
+}
+
+function cleanRows(rows = []) {
+  return rows
+    .map((row) => Array.from(row || []))
+    .filter((row) => row.some((cell) => cell != null && String(cell).trim() !== ""));
+}
+
+const EXPLICIT_TOPIC_KEYWORDS = ["直播主题", "直播标题", "直播名称", "场次主题", "场次标题", "活动名称", "专场名称", "主题名称"];
+const TOPIC_CANDIDATE_KEYWORDS = ["笔记标题", "商品标题", "商品推荐语", "主题", "标题", "直播名称", "直播标题", "活动", "专场"];
+
+function detectPlatform(workbookNames = [], sheetNames = []) {
+  const joined = [...workbookNames, ...sheetNames].join(" ").toLowerCase();
+  if (/抖音|巨量|douyin|tiktok|tik tok/.test(joined)) return "douyin";
+  if (/小红书|xhs|redbook|red book/.test(joined)) return "xiaohongshu";
+  return "unknown";
+}
+
+function buildMetricAliasIndex(defs = METRIC_DEFS) {
+  const index = new Map();
+  for (const [key, def] of Object.entries(defs)) {
+    for (const alias of [def.label, ...def.aliases]) {
+      index.set(normalizeKey(alias), key);
+    }
+  }
+  return index;
+}
+
+function matchMetric(columnName, defs = METRIC_DEFS) {
+  const norm = normalizeKey(columnName);
+  if (!norm) return null;
+  const index = buildMetricAliasIndex(defs);
+  if (index.has(norm)) return { key: index.get(norm), confidence: 1, via: "exact" };
+  for (const [alias, key] of index.entries()) {
+    if (norm.includes(alias) || (norm.length >= 2 && alias.includes(norm))) {
+      return { key, confidence: 0.76, via: "contains" };
+    }
+  }
+  return null;
+}
+
+function findHeaderRow(rows, requiredSignals = ["观看", "gmv", "支付", "view"]) {
+  const limit = Math.min(rows.length, 12);
+  let best = { index: -1, score: 0 };
+  for (let i = 0; i < limit; i += 1) {
+    const row = rows[i] || [];
+    const score = row.reduce((sum, cell) => {
+      const normalized = normalizeKey(cell);
+      const matchedMetric = matchMetric(normalized);
+      const matchedSignal = requiredSignals.some((signal) => normalized.includes(normalizeKey(signal)));
+      return sum + (matchedMetric ? 2 : 0) + (matchedSignal ? 1 : 0);
+    }, 0);
+    if (score > best.score) best = { index: i, score };
+  }
+  return best.score >= 2 ? best.index : -1;
+}
+
+function parseCoreMetrics(rows) {
+  const cleaned = cleanRows(rows);
+  const vertical = parseVerticalMetrics(cleaned);
+  if (vertical.matched.length >= 3) return vertical;
+
+  const headerIndex = findHeaderRow(cleaned);
+  if (headerIndex < 0 || !cleaned[headerIndex + 1]) {
+    return { metrics: {}, matched: [], missing: Object.keys(METRIC_DEFS), headerIndex: -1, layout: "unknown" };
+  }
+  const header = cleaned[headerIndex];
+  const values = cleaned[headerIndex + 1];
+  const metrics = {};
+  const matched = [];
+  header.forEach((column, index) => {
+    const hit = matchMetric(column);
+    if (!hit) return;
+    const def = METRIC_DEFS[hit.key];
+    const value = def.percent ? asPercent(values[index]) : toNumber(values[index]);
+    if (value == null) return;
+    metrics[hit.key] = value;
+    matched.push({ metric: hit.key, column: String(column), value, confidence: hit.confidence, via: hit.via });
+  });
+  const missing = Object.keys(METRIC_DEFS).filter((key) => metrics[key] == null);
+  return { metrics, matched, missing, headerIndex, layout: "wide" };
+}
+
+function parseVerticalMetrics(rows) {
+  const cleaned = cleanRows(rows);
+  const metrics = {};
+  const matched = [];
+
+  for (const row of cleaned) {
+    for (let index = 0; index < row.length - 1; index += 1) {
+      const hit = matchMetric(row[index]);
+      if (!hit) continue;
+      const def = METRIC_DEFS[hit.key];
+      const value = def.percent ? asPercent(row[index + 1]) : toNumber(row[index + 1]);
+      if (value == null) continue;
+      metrics[hit.key] = value;
+      matched.push({ metric: hit.key, column: String(row[index]), value, confidence: hit.confidence, via: hit.via });
+    }
+  }
+
+  const missing = Object.keys(METRIC_DEFS).filter((key) => metrics[key] == null);
+  return { metrics, matched, missing, headerIndex: -1, layout: matched.length ? "vertical" : "unknown" };
+}
+
+function deriveMetrics(metrics) {
+  const out = { ...metrics };
+  if (out.avgWatchSeconds != null) out.avgWatchMinutes = out.avgWatchSeconds / 60;
+  if (out.gmv != null && out.buyers) out.aovDerived = out.gmv / out.buyers;
+  if (out.buyers != null && out.viewers) out.payConversionRate = (out.buyers / out.viewers) * 100;
+  if (out.views != null && out.exposure) out.enterRate = (out.views / out.exposure) * 100;
+  if (out.productClicks != null && out.viewers) out.productClickRate = (out.productClicks / out.viewers) * 100;
+  if (out.productClicks != null && out.productExposure) out.productCtr = (out.productClicks / out.productExposure) * 100;
+  if (out.refundRate == null && out.refunds != null && out.gmv) out.refundRate = (out.refunds / out.gmv) * 100;
+  return out;
+}
+
+function rowsToRecords(rows, requiredSignals = ["商品", "渠道", "支付", "观看", "曝光"]) {
+  const cleaned = cleanRows(rows);
+  const headerIndex = findHeaderRow(cleaned, requiredSignals);
+  if (headerIndex < 0) return [];
+  const headers = cleaned[headerIndex].map((cell) => String(cell ?? "").trim());
+  return cleaned.slice(headerIndex + 1).map((row) => {
+    const record = {};
+    headers.forEach((header, index) => {
+      if (!header) return;
+      record[header] = row[index];
+    });
+    return record;
+  });
+}
+
+function pickValue(record, aliases) {
+  const aliasSet = aliases.map(normalizeKey);
+  for (const [key, value] of Object.entries(record || {})) {
+    const norm = normalizeKey(key);
+    if (aliasSet.some((alias) => norm === alias || norm.includes(alias) || alias.includes(norm))) {
+      return value;
+    }
+  }
+  return null;
+}
+
+function recordKey(record, aliases) {
+  const aliasSet = aliases.map(normalizeKey);
+  return Object.keys(record || {}).find((key) => {
+    const norm = normalizeKey(key);
+    return aliasSet.some((alias) => norm === alias || norm.includes(alias) || alias.includes(norm));
+  });
+}
+
+function fillDownGroup(records, aliases = ["分类方式", "category"]) {
+  let lastGroup = "";
+  return records.map((record) => {
+    const key = recordKey(record, aliases);
+    if (!key) return record;
+    const value = record[key];
+    if (value != null && String(value).trim() !== "") {
+      lastGroup = String(value).trim();
+      return record;
+    }
+    if (!lastGroup) return record;
+    return { ...record, [key]: lastGroup };
+  });
+}
+
+function classifyProduct(name = "") {
+  const text = String(name);
+  if (/课程|报告解读|调理课|筛查表|自查清单|手册|服务|1v1|解读/.test(text)) {
+    if (/清单|筛查表|自查|手册/.test(text) && !/课程|服务|报告解读/.test(text)) return "lead_magnet";
+    if (/服务|1v1|解读/.test(text)) return "service";
+    return "course";
+  }
+  if (/镁|维生素|益生|益生元|膳食纤维|辅酶|鱼油|牛肝|营养|胶囊|片|粉|小檗碱|黄连素|DAO|纳豆|生酮|电解质/.test(text)) {
+    return "supplement";
+  }
+  if (/书|出版社|超级肠道/.test(text)) return "book";
+  return "other";
+}
+
+function parseProducts(rows, limit = 200) {
+  const records = rowsToRecords(rows);
+  return records
+    .map((record) => {
+      const name = pickValue(record, ["商品名称", "商品标题", "product name", "title"]);
+      if (!name) return null;
+      const paidAmount = toNumber(pickValue(record, ["支付金额（商家实收）", "支付金额", "成交金额", "gmv"]));
+      const paidUnits = toNumber(pickValue(record, ["支付商品件数", "支付件数", "支付订单数", "orders"]));
+      const price = toNumber(pickValue(record, ["直播间价格", "商品价格", "到手价", "售价", "price"]));
+      const exposure = toNumber(pickValue(record, ["商品曝光人数", "曝光人数", "impressions"]));
+      const clicks = toNumber(pickValue(record, ["商品点击人数", "商详浏览次数", "商品点击次数", "product clicks"]));
+      const refunds = toNumber(pickValue(record, ["退款金额", "refund"]));
+      const clickRate = exposure && clicks != null ? (clicks / exposure) * 100 : null;
+      const conversionRate = clicks && paidUnits != null ? (paidUnits / clicks) * 100 : null;
+      return {
+        name: String(name),
+        role: classifyProduct(name),
+        price,
+        paidAmount,
+        paidUnits,
+        exposure,
+        clicks,
+        refunds,
+        clickRate,
+        conversionRate,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => (b.paidAmount || 0) - (a.paidAmount || 0))
+    .slice(0, limit);
+}
+
+function classifyTrafficSource(source = "") {
+  const text = String(source);
+  if (/分享|群聊|消息|私信/.test(text)) return "share";
+  if (/关注|粉丝/.test(text)) return "follower";
+  if (/搜索|笔记|个人主页|视频|发现|推荐|直播广场|上下滑|开屏/.test(text)) return "public";
+  if (/店铺|购物|订单/.test(text)) return "shop";
+  return "other";
+}
+
+function parseTrafficSources(rows, limit = 200) {
+  const records = fillDownGroup(rowsToRecords(rows));
+  return records
+    .map((record) => {
+      const group = pickValue(record, ["分类方式", "category"]);
+      const source = pickValue(record, ["渠道名称", "子项", "来源渠道", "source", "channel"]);
+      if (!source) return null;
+      if (group && !/来源|渠道/.test(String(group))) return null;
+      if (!isTrafficName(source)) return null;
+      const views = toNumber(pickValue(record, ["观看次数", "views"]));
+      const viewers = toNumber(pickValue(record, ["观看人数", "viewers"]));
+      const avgWatchSeconds = toNumber(pickValue(record, ["人均观看时长（秒）", "人均观看时长(秒)", "avg watch"]));
+      const paidAmount = toNumber(pickValue(record, ["支付金额", "支付金额（商家实收）", "gmv"]));
+      const orders = toNumber(pickValue(record, ["支付订单数", "orders"]));
+      const buyers = toNumber(pickValue(record, ["支付人数", "buyers"]));
+      const explicitGpm = toNumber(pickValue(record, ["千次观看成交", "千次观看成交金额", "gpm"]));
+      const gpm = explicitGpm ?? (views ? (paidAmount || 0) / views * 1000 : null);
+      const payConversionRate = viewers && buyers != null ? buyers / viewers * 100 : null;
+      const trafficShare = asPercent(pickValue(record, ["流量占比", "观看占比", "traffic share"]));
+      const amountShare = asPercent(pickValue(record, ["金额占比", "成交占比", "amount share"]));
+      return {
+        source: String(source),
+        sourceType: classifyTrafficSource(source),
+        views,
+        viewers,
+        avgWatchSeconds,
+        paidAmount,
+        orders,
+        buyers,
+        gpm,
+        payConversionRate,
+        trafficShare,
+        amountShare,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => (b.paidAmount || 0) - (a.paidAmount || 0))
+    .slice(0, limit);
+}
+
+function isTrafficName(source = "") {
+  return /分享|群聊|消息|关注|发现|搜索|笔记|个人主页|视频|直播广场|上下滑|开屏|店铺|购物|订单|其他/.test(String(source));
+}
+
+function parseAudienceSegments(rows, limit = 300) {
+  const records = fillDownGroup(rowsToRecords(rows));
+  return records
+    .map((record) => {
+      const group = pickValue(record, ["分类方式", "category"]);
+      const segment = pickValue(record, ["子项", "segment"]);
+      const viewers = toNumber(pickValue(record, ["观看人数", "viewers"]));
+      const buyers = toNumber(pickValue(record, ["支付人数", "buyers"]));
+      const paidAmount = toNumber(pickValue(record, ["支付金额（商家实收）", "支付金额", "gmv"]));
+      if (!segment) return null;
+      return {
+        group: String(group || "未分组"),
+        segment: String(segment),
+        viewers,
+        buyers,
+        paidAmount,
+        payConversionRate: viewers && buyers != null ? buyers / viewers * 100 : null,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => (b.paidAmount || 0) - (a.paidAmount || 0))
+    .slice(0, limit);
+}
+
+function extractBasicInfo(rows) {
+  const cleaned = cleanRows(rows);
+  const headerIndex = cleaned.findIndex((row) => row.some((cell) => /开播账号|开播时间|直播时长/.test(String(cell ?? ""))));
+  const headers = headerIndex >= 0 ? cleaned[headerIndex].map((cell) => String(cell ?? "").trim()) : [];
+  const values = headerIndex >= 0 ? cleaned[headerIndex + 1] || [] : [];
+  const first = {};
+  headers.forEach((header, index) => {
+    if (header) first[header] = values[index];
+  });
+  return {
+    accountName: stringOrEmpty(pickValue(first, ["开播账号名称", "账号名称", "account name"])),
+    accountId: stringOrEmpty(pickValue(first, ["开播账号ID", "小红书号", "account id"])),
+    startTime: stringOrEmpty(pickValue(first, ["开播时间", "start time", "date"])),
+    durationMinutes: toNumber(pickValue(first, ["直播时长（分钟）", "直播时长", "duration"])),
+  };
+}
+
+function parseLeadNotes(rows, limit = 300) {
+  const records = rowsToRecords(rows, ["笔记", "引流", "阅读", "观播", "支付"]);
+  return records
+    .map((record) => {
+      const title = pickValue(record, ["笔记标题", "标题", "note title", "content title"]);
+      const noteId = pickValue(record, ["笔记ID", "笔记id", "note id"]);
+      if (!title && !noteId) return null;
+      const reads = toNumber(pickValue(record, ["笔记阅读数", "阅读数", "reads"]));
+      const viewCount = toNumber(pickValue(record, ["引流观播次数", "引流观看次数", "live views"]));
+      const viewers = toNumber(pickValue(record, ["引流观看人数", "观看人数", "viewers"]));
+      const paidAmount = toNumber(pickValue(record, ["引流支付金额", "支付金额", "gmv"]));
+      const paidUnits = toNumber(pickValue(record, ["引流支付件数", "支付件数"]));
+      const orders = toNumber(pickValue(record, ["引流支付订单数", "支付订单数", "orders"]));
+      const readToViewRate = asPercent(pickValue(record, ["阅读-观播率（次数）", "阅读-观播率(次数)", "阅读观播率", "read to view rate"]));
+      const viewToPayConversionRate = asPercent(pickValue(record, ["观看-支付转化率（次数）", "观看-支付转化率(次数)", "观播支付转化率", "view to pay rate"]));
+      return {
+        noteId: stringOrEmpty(noteId),
+        title: stringOrEmpty(title),
+        authorName: stringOrEmpty(pickValue(record, ["作者名称", "作者", "author"])),
+        authorId: stringOrEmpty(pickValue(record, ["作者小红书号", "作者ID", "author id"])),
+        publishedAt: stringOrEmpty(pickValue(record, ["发布时间", "publish time", "published at"])),
+        isPreviewLinked: stringOrEmpty(pickValue(record, ["是否关联预告", "关联预告"])),
+        reads,
+        viewCount,
+        viewers,
+        paidAmount,
+        paidUnits,
+        orders,
+        readToViewRate,
+        viewToPayConversionRate,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => (b.paidAmount || 0) - (a.paidAmount || 0) || (b.viewers || 0) - (a.viewers || 0))
+    .slice(0, limit);
+}
+
+function topAudienceSegmentsBySession(sessions = [], groupPattern, limit = 3) {
+  const pattern = groupPattern instanceof RegExp ? groupPattern : new RegExp(String(groupPattern || ""));
+  return sessions
+    .map((session) => {
+      const rows = (session.audienceSegments || []).filter((segment) => pattern.test(String(segment.group || "")));
+      const rankField = rows.some((row) => Number(row.paidAmount) > 0) ? "paidAmount" : "viewers";
+      const ranked = [...rows]
+        .sort(compareAudienceSegments)
+        .slice(0, limit)
+        .map((row) => ({ ...row, session, rankField }));
+      return {
+        session,
+        rows: ranked,
+        total: rows.length,
+        rankField,
+        maxValue: Math.max(1, ...ranked.map((row) => Number(row[rankField]) || 0)),
+      };
+    })
+    .filter((group) => group.rows.length);
+}
+
+function topLeadNotesBySession(sessions = [], limit = 5) {
+  return sessions
+    .map((session) => {
+      const rows = [...(session.leadNotes || [])];
+      const rankField = rows.some((row) => Number(row.paidAmount) > 0)
+        ? "paidAmount"
+        : rows.some((row) => Number(row.viewers) > 0)
+          ? "viewers"
+          : rows.some((row) => Number(row.viewCount) > 0)
+            ? "viewCount"
+            : "reads";
+      const ranked = rows
+        .sort(compareLeadNotes)
+        .slice(0, limit)
+        .map((row) => ({ ...row, session, rankField }));
+      return {
+        session,
+        rows: ranked,
+        total: rows.length,
+        rankField,
+        maxValue: Math.max(1, ...ranked.map((row) => Number(row[rankField]) || 0)),
+      };
+    })
+    .filter((group) => group.rows.length);
+}
+
+function compareAudienceSegments(a, b) {
+  return (
+    (Number(b.paidAmount) || 0) - (Number(a.paidAmount) || 0) ||
+    (Number(b.viewers) || 0) - (Number(a.viewers) || 0) ||
+    (Number(b.buyers) || 0) - (Number(a.buyers) || 0) ||
+    String(a.segment || "").localeCompare(String(b.segment || ""), "zh-Hans-CN")
+  );
+}
+
+function compareLeadNotes(a, b) {
+  return (
+    (Number(b.paidAmount) || 0) - (Number(a.paidAmount) || 0) ||
+    (Number(b.viewers) || 0) - (Number(a.viewers) || 0) ||
+    (Number(b.viewCount) || 0) - (Number(a.viewCount) || 0) ||
+    (Number(b.reads) || 0) - (Number(a.reads) || 0) ||
+    String(a.title || a.noteId || "").localeCompare(String(b.title || b.noteId || ""), "zh-Hans-CN")
+  );
+}
+
+function auditTopicFields(rows, sheetName = "", sourceName = "") {
+  const cleaned = cleanRows(rows);
+  const explicit = [];
+  const candidates = [];
+
+  for (let rowIndex = 0; rowIndex < Math.min(cleaned.length, 200); rowIndex += 1) {
+    const row = cleaned[rowIndex];
+    for (let colIndex = 0; colIndex < row.length; colIndex += 1) {
+      const cell = row[colIndex];
+      const text = String(cell ?? "").trim();
+      if (!text) continue;
+      const kind = classifyTopicCell(text);
+      if (!kind) continue;
+      const value = topicValueForCell(row, colIndex, rowIndex, cleaned, kind);
+      const hit = {
+        kind,
+        label: text,
+        value: value == null ? "" : String(value),
+        sheet: sheetName,
+        sourceName,
+        row: rowIndex + 1,
+        column: colIndex + 1,
+      };
+      if (kind === "explicit") explicit.push(hit);
+      else candidates.push(hit);
+    }
+  }
+
+  return { explicit, candidates };
+}
+
+function classifyTopicCell(text) {
+  const normalized = normalizeKey(text);
+  if (EXPLICIT_TOPIC_KEYWORDS.some((keyword) => normalized.includes(normalizeKey(keyword)))) return "explicit";
+  if (TOPIC_CANDIDATE_KEYWORDS.some((keyword) => normalized.includes(normalizeKey(keyword)))) return "candidate";
+  return "";
+}
+
+function topicValueForCell(row, colIndex, rowIndex, rows, kind) {
+  if (!isLikelyHeaderRow(row)) return row[colIndex];
+  const below = rows[rowIndex + 1]?.[colIndex];
+  if (below != null && String(below).trim() !== "") return below;
+  if (kind === "explicit") {
+    const sameRowNext = row[colIndex + 1];
+    if (sameRowNext != null && String(sameRowNext).trim() !== "") return sameRowNext;
+  }
+  return "";
+}
+
+function isLikelyHeaderRow(row = []) {
+  const labels = row.map((cell) => normalizeKey(cell)).filter(Boolean);
+  if (labels.length < 2) return false;
+  const headerHits = labels.filter((label) =>
+    /id|名称|标题|时间|人数|次数|金额|订单|占比|点击率|转化率|价格|库存|作者|商品|笔记|渠道|分类方式|子项/.test(label),
+  );
+  return headerHits.length >= 2;
+}
+
+function stringOrEmpty(value) {
+  return value == null ? "" : String(value);
+}
+
+function guessStreamId(name = "") {
+  const text = String(name);
+  const longId = text.match(/\d{12,}/);
+  if (longId) return longId[0];
+  const date = text.match(/20\d{2}[-_/年.]?\d{1,2}[-_/月.]?\d{1,2}/);
+  if (date) return date[0].replace(/\D/g, "");
+  return "";
+}
+
+function buildSessionsFromWorkbooks(workbooks = []) {
+  const enriched = workbooks.map((workbook) => {
+    const sheetNames = Object.keys(workbook.sheets || {});
+    const basicRows = workbook.sheets?.基本信息 || workbook.sheets?.["Basic Info"];
+    const basicInfo = basicRows ? extractBasicInfo(basicRows) : {};
+    const overviewRows = workbook.sheets?.数据概览 || workbook.sheets?.["核心数据"] || workbook.sheets?.["Core Data"];
+    const overview = overviewRows ? parseCoreMetrics(overviewRows) : { metrics: {} };
+    return { ...workbook, sheetNames, basicInfo, overview, explicitStreamId: guessStreamId(workbook.name) };
+  });
+
+  const explicitAnchors = enriched.filter((item) => item.explicitStreamId);
+  const groups = new Map();
+  for (const workbook of enriched) {
+    let streamId = workbook.explicitStreamId;
+    if (!streamId) {
+      const match = findBestAnchor(workbook, explicitAnchors);
+      streamId = match?.explicitStreamId || `ungrouped:${workbook.name}`;
+    }
+    if (!groups.has(streamId)) groups.set(streamId, []);
+    groups.get(streamId).push(workbook);
+  }
+
+  return Array.from(groups.entries()).map(([streamId, items]) => {
+    const allSheetNames = items.flatMap((item) => Object.keys(item.sheets || {}));
+    const platform = detectWorkbookPlatform(items, allSheetNames);
+    const session = {
+      id: `${platform}:${streamId}`,
+      streamId,
+      platform,
+      sourceName: items.map((item) => item.name).join(" + "),
+      files: items.map((item) => item.name),
+      basicInfo: {},
+      metrics: {},
+      products: [],
+      trafficSources: [],
+      audienceSegments: [],
+      leadNotes: [],
+      topicAudit: {
+        explicit: [],
+        candidates: [],
+        checkedSheets: [],
+      },
+      breakdowns: {
+        products: [],
+        traffic: [],
+        audience: [],
+        leadNotes: [],
+      },
+      importReport: {
+        status: "needs_review",
+        files: items.map((item) => item.name),
+        recognizedSheets: [],
+        ignoredSheets: [],
+        core: { matched: [], missing: Object.keys(METRIC_DEFS), sheet: "", layout: "unknown" },
+      },
+      diagnosis: [],
+    };
+
+    for (const item of items) {
+      for (const [sheetName, rows] of Object.entries(item.sheets || {})) {
+        const sheetRef = `${item.name} / ${sheetName}`;
+        const topicAudit = auditTopicFields(rows, sheetName, item.name);
+        session.topicAudit.explicit.push(...withSource(topicAudit.explicit, sheetRef));
+        session.topicAudit.candidates.push(...withSource(topicAudit.candidates, sheetRef));
+        session.topicAudit.checkedSheets.push(sheetRef);
+        if (isPrivacySheet(sheetName, rows)) {
+          session.importReport.ignoredSheets.push({ kind: "privacy", sheet: sheetRef });
+          continue;
+        }
+        if (/基本信息/.test(sheetName)) {
+          session.basicInfo = { ...session.basicInfo, ...removeEmptyValues(extractBasicInfo(rows)) };
+          session.importReport.recognizedSheets.push({ kind: "basic", sheet: sheetRef });
+        }
+        if (/核心数据|数据概览|overview|core/i.test(sheetName)) {
+          const parsed = parseCoreMetrics(rows);
+          if (parsed.matched.length) {
+            session.metrics = { ...session.metrics, ...parsed.metrics };
+            session.importReport.core = { ...parsed, sheet: sheetRef };
+            session.importReport.recognizedSheets.push({ kind: "core", sheet: sheetRef });
+          }
+        }
+        if (/商品分析|商品数据|商品明细|product/i.test(sheetName)) {
+          const products = withSource(parseProducts(rows), sheetRef);
+          if (products.length) {
+            session.breakdowns.products.push(...products);
+            session.products.push(...products);
+            session.importReport.recognizedSheets.push({ kind: "product", sheet: sheetRef, rows: products.length });
+          }
+        }
+        if (/流量渠道|推广流量|观众来源|traffic|channel/i.test(sheetName)) {
+          const trafficSources = withSource(parseTrafficSources(rows), sheetRef);
+          if (trafficSources.length) {
+            session.breakdowns.traffic.push(...trafficSources);
+            session.trafficSources.push(...trafficSources);
+            session.importReport.recognizedSheets.push({ kind: "traffic", sheet: sheetRef, rows: trafficSources.length });
+          }
+          const audienceSegments = withSource(parseAudienceSegments(rows), sheetRef);
+          if (audienceSegments.length) {
+            session.breakdowns.audience.push(...audienceSegments);
+            session.audienceSegments.push(...audienceSegments);
+            session.importReport.recognizedSheets.push({ kind: "audience", sheet: sheetRef, rows: audienceSegments.length });
+          }
+        }
+        if (/引流笔记|直播引流|笔记引流|lead|note/i.test(sheetName)) {
+          const leadNotes = withSource(parseLeadNotes(rows), sheetRef);
+          if (leadNotes.length) {
+            session.breakdowns.leadNotes.push(...leadNotes);
+            session.leadNotes.push(...leadNotes);
+            session.importReport.recognizedSheets.push({ kind: "lead_note", sheet: sheetRef, rows: leadNotes.length });
+          }
+        }
+      }
+    }
+
+    session.metrics = deriveMetrics(session.metrics);
+    session.products = dedupeBy(session.products, "name")
+      .sort((a, b) => (b.paidAmount || 0) - (a.paidAmount || 0))
+      .slice(0, 200);
+    session.trafficSources = dedupeBy(session.trafficSources, "source")
+      .sort((a, b) => (b.paidAmount || 0) - (a.paidAmount || 0))
+      .slice(0, 200);
+    session.audienceSegments = session.audienceSegments
+      .sort((a, b) => audienceGroupRank(a.group) - audienceGroupRank(b.group) || (b.paidAmount || 0) - (a.paidAmount || 0))
+      .slice(0, 300);
+    session.leadNotes = session.leadNotes
+      .sort((a, b) => (b.paidAmount || 0) - (a.paidAmount || 0) || (b.viewers || 0) - (a.viewers || 0))
+      .slice(0, 300);
+    session.topicAudit.explicit = dedupeTopicHits(session.topicAudit.explicit);
+    session.topicAudit.candidates = dedupeTopicHits(session.topicAudit.candidates).slice(0, 80);
+    session.topic = session.topicAudit.explicit.find((hit) => hit.value)?.value || "";
+    session.breakdowns.products = session.breakdowns.products.sort((a, b) => (b.paidAmount || 0) - (a.paidAmount || 0));
+    session.breakdowns.traffic = session.breakdowns.traffic.sort((a, b) => (b.paidAmount || 0) - (a.paidAmount || 0));
+    session.breakdowns.audience = session.audienceSegments;
+    session.breakdowns.leadNotes = session.leadNotes;
+    session.importReport.core.missing = Object.keys(METRIC_DEFS).filter((key) => session.metrics[key] == null);
+    session.importReport.status = session.importReport.core.matched.length ? "recognized" : "needs_review";
+    session.diagnosis = diagnoseSession(session.metrics);
+    return session;
+  });
+}
+
+function withSource(items, sourceSheet) {
+  return items.map((item) => ({ ...item, sourceSheet }));
+}
+
+function audienceGroupRank(group = "") {
+  if (/来源|渠道/.test(group)) return 1;
+  if (/粉丝/.test(group)) return 2;
+  if (/性别/.test(group)) return 3;
+  if (/年龄/.test(group)) return 4;
+  if (/地区|地域|省份|城市/.test(group)) return 5;
+  return 9;
+}
+
+function isPrivacySheet(sheetName, rows) {
+  const name = String(sheetName || "");
+  if (/抽奖|通讯信息|中奖用户|收货|手机号|手机号码|地址/.test(name)) return true;
+  const sample = cleanRows(rows).slice(0, 6).flat().join(" ");
+  return /通讯信息|中奖用户|收货地址|手机号|手机号码|详细地址/.test(sample);
+}
+
+function detectWorkbookPlatform(items, sheetNames) {
+  const explicit = detectPlatform(items.flatMap((item) => [item.name, item.container || ""]), sheetNames);
+  if (explicit !== "unknown") return explicit;
+  const joinedSheets = sheetNames.join(" ");
+  if (/买手数据中心|数据概览|观众来源及画像|引流笔记|小红书号|薯钻/.test(joinedSheets)) return "xiaohongshu";
+  const firstCells = items
+    .flatMap((item) => Object.values(item.sheets || {}).flatMap((rows) => cleanRows(rows).slice(0, 4).flat()))
+    .join(" ");
+  if (/小红书号|薯钻|买手数据中心|观众来源及画像/.test(firstCells)) return "xiaohongshu";
+  if (/抖音|巨量百应|电商罗盘|直播间成交|千川/.test(firstCells)) return "douyin";
+  return "unknown";
+}
+
+function findBestAnchor(workbook, anchors) {
+  const metrics = workbook.overview?.metrics || {};
+  if (!Object.keys(metrics).length) return null;
+  let best = null;
+  for (const anchor of anchors) {
+    const anchorMetrics = anchor.overview?.metrics || {};
+    let score = 0;
+    for (const key of ["viewers", "gmv", "buyers", "fans", "refunds"]) {
+      if (metrics[key] == null || anchorMetrics[key] == null) continue;
+      const diff = Math.abs(metrics[key] - anchorMetrics[key]);
+      const tolerance = Math.max(1, Math.abs(anchorMetrics[key]) * 0.005);
+      if (diff <= tolerance) score += key === "gmv" ? 3 : 2;
+    }
+    if (!best || score > best.score) best = { ...anchor, score };
+  }
+  return best && best.score >= 3 ? best : null;
+}
+
+function removeEmptyValues(obj) {
+  return Object.fromEntries(Object.entries(obj).filter(([, value]) => value !== "" && value != null));
+}
+
+function dedupeBy(items, keyOrFn) {
+  const keyFn = typeof keyOrFn === "function" ? keyOrFn : (item) => item[keyOrFn];
+  const seen = new Set();
+  const out = [];
+  for (const item of items) {
+    const key = keyFn(item);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
+  }
+  return out;
+}
+
+function dedupeTopicHits(items) {
+  return dedupeBy(items, (item) => `${item.kind}:${item.label}:${item.value}:${item.sourceSheet || item.sheet}:${item.row}:${item.column}`);
+}
+
+function diagnoseSession(metrics) {
+  const m = deriveMetrics(metrics);
+  const notes = [];
+  if (m.exposure != null && m.exposure < 10000) {
+    notes.push({ level: "warn", area: "流量入口", text: "曝光偏低，优先看预热、封面、标题和平台推荐入口。" });
+  }
+  if (m.avgWatchMinutes != null && m.avgWatchMinutes < 5) {
+    notes.push({ level: "risk", area: "内容承接", text: "平均停留低，说明开场或主线承接弱，周会应复盘前 5 分钟。" });
+  }
+  if (m.avgWatchMinutes != null && m.avgWatchMinutes >= 12 && m.payConversionRate != null && m.payConversionRate < 3) {
+    notes.push({ level: "warn", area: "货盘转化", text: "停留够但支付转化低，优先检查货盘匹配、信任引爆点和购买路径。" });
+  }
+  if (m.productClickRate != null && m.productClickRate < 18) {
+    notes.push({ level: "warn", area: "看货兴趣", text: "商品点击/浏览率偏低，说明内容到货盘的过渡还不够顺。" });
+  }
+  if (m.refundRate != null && m.refundRate > 15) {
+    notes.push({ level: "risk", area: "退款风险", text: "退款率偏高，周会要拆退款商品、承诺边界和售后解释。" });
+  }
+  if (m.gmv != null && m.gmv > 20000 && m.fans != null && m.fans < 20) {
+    notes.push({ level: "info", area: "增长质量", text: "成交不错但涨粉弱，可能是老粉场强、公域拉新弱。" });
+  }
+  if (!notes.length) notes.push({ level: "ok", area: "整体", text: "核心链路暂无明显规则风险，继续结合商品和人群看结构。" });
+  return notes;
+}
+
+function normalizeSession({ platform = "unknown", sourceName = "", coreRows = [] }) {
+  const parsed = parseCoreMetrics(coreRows);
+  const metrics = deriveMetrics(parsed.metrics);
+  return {
+    id: `${platform}:${sourceName || Date.now()}`,
+    platform,
+    sourceName,
+    metrics,
+    importReport: {
+      core: parsed,
+      status: parsed.matched.length ? "recognized" : "needs_review",
+    },
+    diagnosis: diagnoseSession(metrics),
+  };
+}
+
+
+let SESSIONS=[];
+const $=s=>document.querySelector(s);
+const fmt=n=>n==null||Number.isNaN(Number(n))?'--':Number(n).toLocaleString('zh-CN',{maximumFractionDigits:1});
+const pct=n=>n==null||Number.isNaN(Number(n))?'--':Number(n).toLocaleString('zh-CN',{maximumFractionDigits:1})+'%';
+const money=n=>n==null||Number.isNaN(Number(n))?'--':'¥'+Number(n).toLocaleString('zh-CN',{maximumFractionDigits:0});
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+function switchTab(id){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));document.querySelectorAll('section').forEach(s=>s.classList.toggle('active',s.id===id))}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+$('#drop').onclick=()=>$('#file').click();
+$('#drop').ondragover=e=>{e.preventDefault();$('#drop').style.borderColor='var(--blue)'};
+$('#drop').ondragleave=()=>$('#drop').style.borderColor='#b8c2d6';
+$('#drop').ondrop=e=>{e.preventDefault();$('#drop').style.borderColor='#b8c2d6';handleFiles(e.dataTransfer.files)};
+$('#file').onchange=()=>handleFiles($('#file').files);
+$('#clearAll').onclick=()=>{SESSIONS=[];localStorage.removeItem('live-review-sessions-v2');renderAll();switchTab('import')};
+$('#exportJson').onclick=()=>downloadText('live-review-analysis.json',JSON.stringify({generatedAt:new Date().toISOString(),sessions:SESSIONS},null,2),'application/json');
+$('#loadDemo').onclick=()=>{SESSIONS=demoSessions();persist();renderAll();switchTab('weekly')};
+
+try{const saved=localStorage.getItem('live-review-sessions-v2');if(saved)SESSIONS=JSON.parse(saved)||[]}catch{}
+renderAll();
+
+async function handleFiles(files){
+  $('#status').textContent='正在本地解包、拆表和归类...';
+  const {workbooks,errors}=await unpackFiles(files);
+  const sessions=buildSessionsFromWorkbooks(workbooks);
+  SESSIONS=mergeSessions(SESSIONS,sessions);
+  persist();
+  $('#status').textContent='已读取 '+workbooks.length+' 个 Excel，归并成 '+sessions.length+' 场直播；错误 '+errors.length+' 个。';
+  renderAll(errors);
+  switchTab('import');
+}
+
+function persist(){localStorage.setItem('live-review-sessions-v2',JSON.stringify(SESSIONS))}
+function mergeSessions(existing,incoming){const map=new Map(existing.map(s=>[s.id,s]));incoming.forEach(s=>map.set(s.id,s));return Array.from(map.values())}
+async function unpackFiles(files){
+  const workbooks=[],errors=[];
+  for(const f of files){
+    if(/\.zip$/i.test(f.name)){
+      try{
+        const zip=await JSZip.loadAsync(await f.arrayBuffer());
+        for(const p in zip.files){
+          const zf=zip.files[p],base=p.split('/').pop();
+          if(zf.dir||p.includes('__MACOSX')||base.startsWith('._')||base.startsWith('~$')||!/\.xlsx?$/i.test(base))continue;
+          if(/抽奖|通讯信息|中奖用户/.test(base)){errors.push(base+' 已跳过：含抽奖/通讯信息');continue}
+          try{workbooks.push(readWorkbook(base,await zf.async('arraybuffer'),f.name))}
+          catch(e){errors.push(base+' 读取失败：'+e.message)}
+        }
+      }catch(e){errors.push(f.name+' 解压失败：'+e.message)}
+    }else if(/\.xlsx?$/i.test(f.name)){
+      if(/抽奖|通讯信息|中奖用户/.test(f.name)){errors.push(f.name+' 已跳过：含抽奖/通讯信息');continue}
+      try{workbooks.push(readWorkbook(f.name,await f.arrayBuffer(),f.name))}
+      catch(e){errors.push(f.name+' 读取失败：'+e.message)}
+    }
+  }
+  return{workbooks,errors};
+}
+function readWorkbook(name,buf,container){
+  const wb=XLSX.read(buf,{type:'array'});
+  const sheets=Object.fromEntries(wb.SheetNames.map(n=>[n,XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:null})]));
+  return{name,container,sheets};
+}
+
+function renderAll(errors=[]){renderImport(errors);renderWeekly();renderPlatform('xiaohongshu','#xhsView');renderPlatform('douyin','#douyinView');renderProducts();renderTraffic();renderAudience();renderContent();renderRaw();renderCompare();renderActions()}
+function platformBadge(p){return p==='xiaohongshu'?'<span class="badge xhs">小红书</span>':p==='douyin'?'<span class="badge dy">抖音</span>':'<span class="badge warn">待识别平台</span>'}
+function statusBadge(status){return status==='recognized'?'<span class="badge ok">可用于复盘</span>':'<span class="badge risk">需人工复核</span>'}
+function streamTitle(s){return esc(s.basicInfo?.startTime||s.streamId||s.sourceName||'未命名场次')}
+function sumMetric(list,key){return list.reduce((sum,item)=>sum+(Number(item.metrics?.[key])||0),0)}
+function avgMetric(list,key){const vals=list.map(x=>Number(x.metrics?.[key])).filter(Number.isFinite);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null}
+
+function renderImport(errors=[]){
+  if(!SESSIONS.length){$('#importReport').innerHTML='<div class="empty">还没有导入直播数据。当前网站目标已改为公司周会经营复盘，不再是评论看板。</div>';return}
+  $('#importReport').innerHTML='<div class="panel"><h2>导入体检报告</h2><div class="note">判断标准：核心指标能识别才允许进入周会结论；商品、流量、人群、内容引流是解释层。抽奖通讯信息默认跳过，避免地址手机号进入会议屏幕。</div><div class="table-wrap"><table><thead><tr><th>平台</th><th>场次</th><th>来源文件</th><th>核心字段</th><th>结构层</th><th>隐私跳过</th><th>缺失字段</th><th>状态</th></tr></thead><tbody>'+SESSIONS.map(s=>'<tr><td>'+platformBadge(s.platform)+'</td><td>'+streamTitle(s)+'</td><td>'+s.files.map(esc).join('<br>')+'</td><td>'+s.importReport.core.matched.map(x=>'<span class="badge ok">'+METRIC_DEFS[x.metric].label+'</span>').join('')+'</td><td>'+sheetKindBadges(s)+'</td><td>'+privacyBadges(s)+'</td><td>'+s.importReport.core.missing.slice(0,10).map(k=>'<span class="badge">'+METRIC_DEFS[k].label+'</span>').join('')+'</td><td>'+statusBadge(s.importReport.status)+'</td></tr>').join('')+'</tbody></table></div>'+ (errors.length?'<div class="diag risk">'+errors.map(esc).join('<br>')+'</div>':'')+'</div>'
+}
+function sheetKindBadges(s){const kinds=[...new Set((s.importReport.recognizedSheets||[]).map(x=>x.kind))];return kinds.map(k=>'<span class="badge info">'+({basic:'基本信息',core:'核心指标',product:'商品',traffic:'流量',audience:'人群',lead_note:'引流笔记'}[k]||k)+'</span>').join('')}
+function privacyBadges(s){const items=s.importReport.ignoredSheets||[];return items.length?items.map(x=>'<span class="badge warn">'+esc(x.sheet.split(' / ').pop())+'</span>').join(''):'<span class="small">无</span>'}
+
+function renderWeekly(){
+  const list=SESSIONS;
+  if(!list.length){$('#weeklyView').innerHTML='<div class="empty">导入数据后生成周会总览。</div>';return}
+  const gmv=sumMetric(list,'gmv'), viewers=sumMetric(list,'viewers'), buyers=sumMetric(list,'buyers'), fans=sumMetric(list,'fans'), refunds=sumMetric(list,'refunds'), stay=avgMetric(list,'avgWatchMinutes'), conv=viewers?buyers/viewers*100:null, refundRate=gmv?refunds/gmv*100:null;
+  const best=[...list].sort((a,b)=>(b.metrics.gmv||0)-(a.metrics.gmv||0))[0];
+  $('#weeklyView').innerHTML='<div class="grid4"><div class="panel kpi"><div class="label">总 GMV</div><div class="value">'+money(gmv)+'</div><div class="delta">导入 '+list.length+' 场</div></div><div class="panel kpi"><div class="label">总看播 UV</div><div class="value">'+fmt(viewers)+'</div><div class="delta">小红书/抖音合计</div></div><div class="panel kpi"><div class="label">支付转化</div><div class="value">'+pct(conv)+'</div><div class="delta">支付人数 / 看播UV</div></div><div class="panel kpi"><div class="label">退款率</div><div class="value">'+pct(refundRate)+'</div><div class="delta">退款金额 / GMV</div></div></div><div class="grid2 mt"><div class="panel"><h2>本周会上先讲什么</h2>'+meetingLines(list,best).map(x=>'<div class="diag '+x.level+'"><b>'+esc(x.title)+'</b>：'+esc(x.text)+'</div>').join('')+'</div><div class="panel"><h2>链路快照</h2>'+funnelBars(best)+'</div></div><div class="panel mt"><h2>场次横排</h2>'+sessionTable(list)+'</div>'
+}
+function meetingLines(list,best){
+  const unknown=list.filter(s=>s.platform==='unknown').length, needs=list.filter(s=>s.importReport.status!=='recognized').length;
+  const xhs=list.filter(s=>s.platform==='xiaohongshu').length, dy=list.filter(s=>s.platform==='douyin').length;
+  const lines=[{level:'info',title:'会议主线',text:'先讲结果，再讲流量、停留、看货、成交、退款，最后落到下周动作和负责人。'}];
+  if(best)lines.push({level:'ok',title:'正样本',text:'最高 GMV 场次是 '+(best.basicInfo?.startTime||best.streamId)+'，用它拆哪条流量、哪个商品和哪段内容贡献最大。'});
+  if(xhs&&!dy)lines.push({level:'warn',title:'平台覆盖',text:'当前只有小红书真实样本；抖音板块已有适配框架，但需要抖音后台 zip 校验字段。'});
+  if(unknown)lines.push({level:'warn',title:'平台识别',text:unknown+' 场平台待识别，需要补文件名或字段字典。'});
+  if(needs)lines.push({level:'risk',title:'结论边界',text:needs+' 场核心字段不完整，不建议直接拿去会上做结论。'});
+  return lines;
+}
+function funnelBars(s){
+  if(!s)return'<div class="empty">暂无场次</div>';
+  const rows=[
+    ['曝光',s.metrics.exposure],
+    ['看播UV',s.metrics.viewers],
+    ['商品点击/浏览',s.metrics.productClicks],
+    ['支付人数',s.metrics.buyers],
+    ['GMV',s.metrics.gmv],
+  ];
+  const max=Math.max(1,...rows.map(r=>Number(r[1])||0));
+  return rows.map(([label,val])=>'<div class="barrow"><div>'+label+'</div><div class="bar"><i style="width:'+Math.max(2,(Number(val)||0)/max*100)+'%"></i></div><div>'+fmt(val)+'</div></div>').join('')+'<div class="small">最佳场：'+platformBadge(s.platform)+' '+streamTitle(s)+'</div>';
+}
+
+function renderPlatform(platform,target){
+  const list=SESSIONS.filter(s=>s.platform===platform);
+  const title=platform==='xiaohongshu'?'小红书直播':'抖音直播';
+  if(!list.length){$(target).innerHTML='<div class="empty">还没有导入'+title+'数据。'+(platform==='douyin'?'抖音 adapter 已预留，但字段必须用真实后台导出校验。':'')+'</div>';return}
+  $(target).innerHTML='<div class="grid4">'+platformKpis(list)+'</div><div class="grid2 mt"><div class="panel"><h2>'+title+' GMV 对比</h2>'+barChart(list,'gmv',money)+'</div><div class="panel"><h2>'+title+' 停留对比</h2>'+barChart(list,'avgWatchMinutes',v=>fmt(v)+'分')+'</div></div><div class="panel mt"><h2>'+title+' 场次明细</h2>'+sessionTable(list)+'</div>'
+}
+function platformKpis(list){const g=sumMetric(list,'gmv'),v=sumMetric(list,'viewers'),b=sumMetric(list,'buyers'),stay=avgMetric(list,'avgWatchMinutes');return '<div class="panel kpi"><div class="label">场次</div><div class="value">'+list.length+'</div><div class="delta">已导入</div></div><div class="panel kpi"><div class="label">GMV</div><div class="value">'+money(g)+'</div><div class="delta">平台合计</div></div><div class="panel kpi"><div class="label">看播UV</div><div class="value">'+fmt(v)+'</div><div class="delta">平台合计</div></div><div class="panel kpi"><div class="label">平均停留</div><div class="value">'+fmt(stay)+'分</div><div class="delta">各场均值</div></div>'}
+
+function renderProducts(){
+  const list=SESSIONS.flatMap(s=>(s.products||[]).map(p=>({...p,session:s})));
+  if(!list.length){$('#productsView').innerHTML='<div class="empty">导入含商品表的数据后生成商品结构。</div>';return}
+  const byRole=groupSum(list,'role','paidAmount');
+  $('#productsView').innerHTML='<div class="grid2"><div class="panel"><h2>商品角色成交结构</h2>'+roleBars(byRole)+'</div><div class="panel"><h2>商品诊断</h2>'+productDiagnosis(list).map(x=>'<div class="diag '+x.level+'"><b>'+x.title+'</b>：'+x.text+'</div>').join('')+'</div></div><div class="panel mt"><h2>Top 商品</h2><div class="table-wrap">'+productTable(list.sort((a,b)=>(b.paidAmount||0)-(a.paidAmount||0)).slice(0,40))+'</div></div>'
+}
+function roleBars(rows){const labels={course:'课程',service:'服务',supplement:'营养品',lead_magnet:'引流品',book:'书',other:'其他'};const max=Math.max(1,...rows.map(r=>r.value));return rows.map(r=>'<div class="barrow"><div>'+esc(labels[r.key]||r.key)+'</div><div class="bar"><i style="width:'+Math.max(2,r.value/max*100)+'%"></i></div><div>'+money(r.value)+'</div></div>').join('')}
+function productDiagnosis(list){const course=sumBy(list.filter(p=>p.role==='course'||p.role==='service'),'paidAmount'), total=sumBy(list,'paidAmount'), refundHeavy=list.filter(p=>(p.refunds||0)>0).sort((a,b)=>(b.refunds||0)-(a.refunds||0))[0];const out=[];if(total)out.push({level:'info',title:'课程/服务占比',text:'课程和服务贡献 '+pct(course/total*100)+'，这决定会议要讲知识信任还是货盘效率。'});if(refundHeavy)out.push({level:'risk',title:'退款关注',text:'退款最高商品是 '+refundHeavy.name.slice(0,28)+'，退款金额 '+money(refundHeavy.refunds)+'。'});return out.length?out:[{level:'ok',title:'商品结构',text:'暂无明显商品风险，继续看流量和内容承接。'}]}
+function productTable(list){return'<table><thead><tr><th>平台</th><th>场次</th><th>商品</th><th>角色</th><th>成交</th><th>件数</th><th>点击/浏览</th><th>退款</th></tr></thead><tbody>'+list.map(p=>'<tr><td>'+platformBadge(p.session.platform)+'</td><td>'+streamTitle(p.session)+'</td><td>'+esc(p.name)+'</td><td>'+roleName(p.role)+'</td><td>'+money(p.paidAmount)+'</td><td>'+fmt(p.paidUnits)+'</td><td>'+fmt(p.clicks)+'</td><td>'+money(p.refunds)+'</td></tr>').join('')+'</tbody></table>'}
+function roleName(role){return ({course:'课程',service:'服务',supplement:'营养品',lead_magnet:'引流品',book:'书',other:'其他'}[role]||role)}
+
+function renderTraffic(){
+  const list=SESSIONS.flatMap(s=>(s.trafficSources||[]).map(t=>({...t,session:s})));
+  if(!list.length){$('#trafficView').innerHTML='<div class="empty">导入含流量渠道表的数据后生成流量结构。</div>';return}
+  const byType=groupSum(list,'sourceType','paidAmount');
+  $('#trafficView').innerHTML='<div class="grid2"><div class="panel"><h2>流量成交结构</h2>'+trafficTypeBars(byType)+'</div><div class="panel"><h2>流量诊断</h2>'+trafficDiagnosis(list).map(x=>'<div class="diag '+x.level+'"><b>'+x.title+'</b>：'+x.text+'</div>').join('')+'</div></div><div class="panel mt"><h2>渠道贡献明细</h2><div class="table-wrap">'+trafficTable(list.sort((a,b)=>(b.paidAmount||0)-(a.paidAmount||0)).slice(0,120))+'</div></div>'
+}
+function trafficTypeBars(rows){const labels={share:'分享/私域',follower:'关注粉丝',public:'公域入口',shop:'店铺购物',other:'其他'};const max=Math.max(1,...rows.map(r=>r.value));return rows.map(r=>'<div class="barrow"><div>'+esc(labels[r.key]||r.key)+'</div><div class="bar"><i style="width:'+Math.max(2,r.value/max*100)+'%"></i></div><div>'+money(r.value)+'</div></div>').join('')}
+function trafficDiagnosis(list){const publicGmv=sumBy(list.filter(t=>t.sourceType==='public'),'paidAmount'), shareGmv=sumBy(list.filter(t=>t.sourceType==='share'),'paidAmount'), total=sumBy(list,'paidAmount');const out=[];if(total&&shareGmv/total>.45)out.push({level:'info',title:'私域/分享强',text:'分享、群聊、消息贡献 '+pct(shareGmv/total*100)+'，说明信任链强，但要防公域新增不足。'});if(total&&publicGmv/total<.35)out.push({level:'warn',title:'公域弱',text:'公域成交占比 '+pct(publicGmv/total*100)+'，下周要看预热笔记、封面和入口效率。'});return out.length?out:[{level:'ok',title:'流量结构',text:'流量结构暂未触发明显风险。'}]}
+function trafficTable(list){return'<table><thead><tr><th>平台</th><th>场次</th><th>渠道</th><th>类型</th><th>观看</th><th>看播</th><th>停留</th><th>成交</th><th>千次观看成交</th><th>转化</th></tr></thead><tbody>'+list.map(t=>'<tr><td>'+platformBadge(t.session.platform)+'</td><td>'+streamTitle(t.session)+'</td><td>'+esc(t.source)+'</td><td>'+trafficTypeName(t.sourceType)+'</td><td>'+fmt(t.views)+'</td><td>'+fmt(t.viewers)+'</td><td>'+fmt((t.avgWatchSeconds||0)/60)+'分</td><td>'+money(t.paidAmount)+'</td><td>'+money(t.gpm)+'</td><td>'+pct(t.payConversionRate)+'</td></tr>').join('')+'</tbody></table>'}
+function trafficTypeName(type){return ({share:'分享/私域',follower:'关注粉丝',public:'公域入口',shop:'店铺购物',other:'其他'}[type]||type)}
+
+function renderAudience(){
+  const list=SESSIONS.flatMap(s=>(s.audienceSegments||[]).map(a=>({...a,session:s})));
+  if(!list.length){$('#audienceView').innerHTML='<div class="empty">导入含观众来源及画像的数据后生成年龄、地域、性别、粉丝结构。</div>';return}
+  const panels=[
+    ['来源|渠道','来源渠道'],
+    ['年龄|年龄段','年龄段'],
+    ['地区|地域|省份|城市','地域/地区'],
+    ['性别','性别'],
+    ['粉丝','新老粉'],
+  ].map(([pattern,title])=>audienceGroupPanel(SESSIONS,pattern,title)).join('');
+  $('#audienceView').innerHTML='<div class="audience-grid">'+panels+'</div><div class="panel mt"><h2>人群画像明细</h2><div class="table-wrap">'+audienceTable(list)+'</div></div>'
+}
+function audienceGroupPanel(sessions,pattern,title){
+  const groups=topAudienceSegmentsBySession(sessions,new RegExp(pattern),3);
+  if(!groups.length)return '<div class="panel"><h2>'+title+'</h2><div class="empty">暂无 '+title+' 数据</div></div>';
+  return '<div class="panel"><h2>'+title+'</h2>'+groups.map(group=>audienceSessionRank(group,title)).join('')+'</div>';
+}
+function audienceSessionRank(group,title){
+  const label=group.rows.length>=3?title+'前三':title+' Top'+group.rows.length;
+  const summary=group.rows.map((r,i)=>(i+1)+'. '+r.segment).join('、');
+  return '<div class="rank-session"><div class="rank-head"><div class="rank-title">'+streamTitle(group.session)+'</div><div class="rank-meta">Top '+group.rows.length+' / 共 '+group.total+' 项</div></div><div class="rank-summary">'+esc(label)+'：'+esc(summary)+'</div>'+audienceRankRows(group.rows,group.maxValue,group.rankField)+'</div>';
+}
+function audienceRankRows(rows,max,rankField){return rows.map((r,i)=>'<div class="rank-row"><div class="rank-name"><span class="rank-no">'+(i+1)+'</span>'+esc(r.segment)+'</div><div class="bar"><i style="width:'+barWidth(r,rankField,max)+'%"></i></div><div class="rank-value">'+rankValue(r,rankField)+'</div><div class="rank-sub">'+fmt(r.viewers)+'人</div></div>').join('')}
+function audienceTable(list){return'<table><thead><tr><th>平台</th><th>场次</th><th>分组</th><th>子项</th><th>观看人数</th><th>支付人数</th><th>支付金额</th><th>支付转化</th><th>来源表</th></tr></thead><tbody>'+list.map(a=>'<tr><td>'+platformBadge(a.session.platform)+'</td><td>'+streamTitle(a.session)+'</td><td>'+esc(a.group)+'</td><td>'+esc(a.segment)+'</td><td>'+fmt(a.viewers)+'</td><td>'+fmt(a.buyers)+'</td><td>'+money(a.paidAmount)+'</td><td>'+pct(a.payConversionRate)+'</td><td>'+esc((a.sourceSheet||'').split(' / ').pop())+'</td></tr>').join('')+'</tbody></table>'}
+
+function renderContent(){
+  const list=SESSIONS.flatMap(s=>(s.leadNotes||[]).map(n=>({...n,session:s})));
+  if(!list.length){$('#contentView').innerHTML='<div class="empty">导入含引流笔记/内容引流表的数据后生成内容引流复盘。</div>';return}
+  const reads=sumBy(list,'reads'), viewers=sumBy(list,'viewers'), paid=sumBy(list,'paidAmount'), best=[...list].sort((a,b)=>(b.paidAmount||0)-(a.paidAmount||0))[0];
+  $('#contentView').innerHTML='<div class="grid4"><div class="panel kpi"><div class="label">引流内容数</div><div class="value">'+list.length+'</div><div class="delta">已识别笔记/内容</div></div><div class="panel kpi"><div class="label">阅读数</div><div class="value">'+fmt(reads)+'</div><div class="delta">内容侧曝光</div></div><div class="panel kpi"><div class="label">引流看播</div><div class="value">'+fmt(viewers)+'</div><div class="delta">内容到直播间</div></div><div class="panel kpi"><div class="label">引流成交</div><div class="value">'+money(paid)+'</div><div class="delta">'+(best?'最高：'+esc(best.title).slice(0,18):'--')+'</div></div></div><div class="panel mt"><h2>每场引流笔记 Top5</h2>'+leadNoteHighlights(SESSIONS)+'</div><div class="panel mt"><h2>内容引流明细</h2><div class="table-wrap">'+leadNoteTable(list.sort((a,b)=>(b.paidAmount||0)-(a.paidAmount||0)||(b.viewers||0)-(a.viewers||0)))+'</div></div>'
+}
+function leadNoteHighlights(sessions){const groups=topLeadNotesBySession(sessions,5);return groups.length?groups.map(group=>'<div class="rank-session"><div class="rank-head"><div class="rank-title">'+streamTitle(group.session)+'</div><div class="rank-meta">Top '+group.rows.length+' / 共 '+group.total+' 条</div></div><div class="rank-summary">内容前三：'+esc(group.rows.slice(0,3).map((n,i)=>(i+1)+'. '+noteName(n)).join('、'))+'</div>'+leadNoteRankRows(group.rows,group.maxValue,group.rankField)+'</div>').join(''):'<div class="empty">暂无可排行的引流笔记</div>'}
+function leadNoteRankRows(rows,max,rankField){return rows.map((n,i)=>'<div class="rank-row lead-rank-row"><div><div class="lead-title"><span class="rank-no">'+(i+1)+'</span>'+esc(noteName(n))+'</div><div class="lead-date">'+esc(n.publishedAt||'')+'</div></div><div class="bar"><i style="width:'+barWidth(n,rankField,max)+'%"></i></div><div class="rank-value">'+rankValue(n,rankField)+'</div><div class="rank-sub">'+fmt(n.viewCount)+'观播</div><div class="rank-sub">'+fmt(n.reads)+'读</div></div>').join('')}
+function noteName(note){return note.title||note.noteId||'未命名内容'}
+function barWidth(row,field,max){return Math.max(2,((Number(row[field])||0)/Math.max(1,max))*100)}
+function rankValue(row,field){if(field==='paidAmount')return money(row.paidAmount);if(field==='viewers')return fmt(row.viewers)+'人';if(field==='viewCount')return fmt(row.viewCount)+'次';if(field==='reads')return fmt(row.reads)+'读';return fmt(row[field])}
+function leadNoteTable(list){return'<table><thead><tr><th>平台</th><th>场次</th><th>标题</th><th>发布时间</th><th>阅读</th><th>引流观播</th><th>引流看播人数</th><th>引流成交</th><th>支付件数</th><th>阅读-观播</th><th>观看-支付</th><th>来源表</th></tr></thead><tbody>'+list.map(n=>'<tr><td>'+platformBadge(n.session.platform)+'</td><td>'+streamTitle(n.session)+'</td><td>'+esc(n.title||n.noteId)+'</td><td>'+esc(n.publishedAt)+'</td><td>'+fmt(n.reads)+'</td><td>'+fmt(n.viewCount)+'</td><td>'+fmt(n.viewers)+'</td><td>'+money(n.paidAmount)+'</td><td>'+fmt(n.paidUnits)+'</td><td>'+pct(n.readToViewRate)+'</td><td>'+pct(n.viewToPayConversionRate)+'</td><td>'+esc((n.sourceSheet||'').split(' / ').pop())+'</td></tr>').join('')+'</tbody></table>'}
+
+function renderRaw(){
+  if(!SESSIONS.length){$('#rawView').innerHTML='<div class="empty">导入数据后显示每场拆出来的表和行数。</div>';return}
+  $('#rawView').innerHTML='<div class="panel"><h2>每场拆表明细</h2><div class="table-wrap"><table><thead><tr><th>平台</th><th>场次</th><th>来源文件</th><th>识别表</th><th>跳过表</th><th>拆分行数</th><th>主题字段审计</th></tr></thead><tbody>'+SESSIONS.map(s=>'<tr><td>'+platformBadge(s.platform)+'</td><td>'+streamTitle(s)+'</td><td>'+s.files.map(esc).join('<br>')+'</td><td>'+recognizedSheetList(s)+'</td><td>'+privacyBadges(s)+'</td><td>'+breakdownCounts(s)+'</td><td>'+topicAuditView(s)+'</td></tr>').join('')+'</tbody></table></div></div>'
+}
+function recognizedSheetList(s){return (s.importReport.recognizedSheets||[]).map(x=>'<span class="badge info">'+esc(({basic:'基本信息',core:'核心指标',product:'商品',traffic:'流量',audience:'人群',lead_note:'引流笔记'}[x.kind]||x.kind))+' · '+esc(x.sheet.split(' / ').pop())+(x.rows?' · '+x.rows+'行':'')+'</span>').join('')}
+function breakdownCounts(s){return '<span class="badge">商品 '+(s.breakdowns?.products?.length||s.products?.length||0)+'</span><span class="badge">流量 '+(s.breakdowns?.traffic?.length||s.trafficSources?.length||0)+'</span><span class="badge">人群 '+(s.breakdowns?.audience?.length||s.audienceSegments?.length||0)+'</span><span class="badge">引流笔记 '+(s.breakdowns?.leadNotes?.length||s.leadNotes?.length||0)+'</span>'}
+function topicAuditView(s){
+  const explicit=s.topicAudit?.explicit||[], candidates=s.topicAudit?.candidates||[], checked=s.topicAudit?.checkedSheets||[];
+  const explicitHtml=explicit.length?explicit.map(x=>'<span class="badge ok">明确：'+esc(x.label)+' = '+esc(x.value||'空')+'</span>').join(''):'<span class="badge warn">未发现明确直播主题字段</span>';
+  const candidateHtml=candidates.slice(0,8).map(x=>'<span class="badge info">'+esc(x.sheet||'')+' · '+esc(x.label)+(x.value?' = '+esc(String(x.value).slice(0,28)):'')+'</span>').join('');
+  return explicitHtml+'<div class="small">候选线索：'+(candidateHtml||'无')+'</div><div class="small">已检查 '+checked.length+' 个 sheet</div>';
+}
+
+function renderCompare(){
+  if(!SESSIONS.length){$('#compareView').innerHTML='<div class="empty">导入两场以上后生成横向对比。</div>';return}
+  $('#compareView').innerHTML='<div class="grid3"><div class="panel"><h2>GMV</h2>'+barChart(SESSIONS,'gmv',money)+'</div><div class="panel"><h2>看播 UV</h2>'+barChart(SESSIONS,'viewers',fmt)+'</div><div class="panel"><h2>支付转化</h2>'+barChart(SESSIONS,'payConversionRate',pct)+'</div></div><div class="panel mt"><h2>多场经营对比</h2>'+sessionTable(SESSIONS)+'</div>'
+}
+function renderActions(){
+  if(!SESSIONS.length){$('#actionsView').innerHTML='<div class="empty">导入数据后生成会议动作。</div>';return}
+  const lines=buildMeetingScript(SESSIONS);
+  $('#actionsView').innerHTML='<div class="grid2"><div class="panel"><h2>会议讲法草稿</h2><textarea readonly>'+esc(lines.join('\n'))+'</textarea></div><div class="panel"><h2>动作清单</h2>'+actionCards(SESSIONS)+'</div></div><div class="panel mt"><h2>仍需人工补采</h2><p class="small">直播主题、主播、时段目标、是否投流、主推货盘、加微数、咨询数、课程报名数、客服反馈。后台没有这些，网站不能替你编“为什么”。</p></div>'
+}
+function buildMeetingScript(list){const g=sumMetric(list,'gmv'), v=sumMetric(list,'viewers'), b=sumMetric(list,'buyers'), best=[...list].sort((a,b)=>(b.metrics.gmv||0)-(a.metrics.gmv||0))[0];return ['1. 本周导入 '+list.length+' 场直播，总 GMV '+money(g)+'，总看播 UV '+fmt(v)+'，支付人数 '+fmt(b)+'，整体支付转化 '+pct(v?b/v*100:null)+'。','2. 最高成交场是 '+(best?.basicInfo?.startTime||best?.streamId||'--')+'，GMV '+money(best?.metrics.gmv)+'，平均停留 '+fmt(best?.metrics.avgWatchMinutes)+' 分。','3. 复盘顺序建议：先看流量入口，再看停留承接，再看商品点击/浏览，最后看支付与退款。','4. 下周动作不要只说“提高 GMV”，要指定：哪条流量入口、哪段开场话术、哪个主推商品、哪个退款风险。']}
+function actionCards(list){const diags=list.flatMap(s=>s.diagnosis.map(d=>({...d,session:s})));return diags.map(d=>'<div class="diag '+d.level+'">'+platformBadge(d.session.platform)+' <b>'+esc(d.area)+'</b>：'+esc(d.text)+'<div class="small">'+streamTitle(d.session)+'</div></div>').join('')}
+
+function sessionTable(list){return'<div class="table-wrap"><table><thead><tr><th>平台</th><th>场次</th><th>主题状态</th><th>GMV</th><th>看播</th><th>场观</th><th>进房率</th><th>停留</th><th>商品点击</th><th>支付人数</th><th>转化</th><th>退款率</th><th>涨粉</th><th>诊断</th></tr></thead><tbody>'+list.map(s=>'<tr><td>'+platformBadge(s.platform)+'</td><td>'+streamTitle(s)+'</td><td>'+topicStatus(s)+'</td><td>'+money(s.metrics.gmv)+'</td><td>'+fmt(s.metrics.viewers)+'</td><td>'+fmt(s.metrics.views)+'</td><td>'+pct(s.metrics.enterRate)+'</td><td>'+fmt(s.metrics.avgWatchMinutes)+'分</td><td>'+fmt(s.metrics.productClicks)+'</td><td>'+fmt(s.metrics.buyers)+'</td><td>'+pct(s.metrics.payConversionRate)+'</td><td>'+pct(s.metrics.refundRate)+'</td><td>'+fmt(s.metrics.fans)+'</td><td>'+s.diagnosis.map(d=>'<span class="badge '+d.level+'">'+esc(d.area)+'</span>').join('')+'</td></tr>').join('')+'</tbody></table></div>'}
+function topicStatus(s){return s.topic?'<span class="badge ok">'+esc(s.topic)+'</span>':'<span class="badge warn">未发现明确主题字段</span><div class="small">候选 '+((s.topicAudit?.candidates||[]).length)+' 条</div>'}
+function barChart(list,key,format){const vals=list.map(s=>Number(s.metrics[key])||0),max=Math.max(1,...vals);return'<div class="chart">'+list.map((s,i)=>'<div class="col" style="height:'+Math.max(3,vals[i]/max*100)+'%"><b>'+format(vals[i])+'</b><span>'+streamTitle(s).slice(0,10)+'</span></div>').join('')+'</div>'}
+function groupSum(list,key,valueKey){const map=new Map();list.forEach(item=>map.set(item[key]||'other',(map.get(item[key]||'other')||0)+(Number(item[valueKey])||0)));return Array.from(map.entries()).map(([k,v])=>({key:k,value:v})).sort((a,b)=>b.value-a.value)}
+function sumBy(list,key){return list.reduce((s,x)=>s+(Number(x[key])||0),0)}
+function downloadText(filename,text,type){const blob=new Blob([text],{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();URL.revokeObjectURL(a.href)}
+
+function demoSessions(){return buildSessionsFromWorkbooks([
+  {name:'sample_live_2026-06-01.xlsx',sheets:{
+    '基本信息':[['note'],['开播账号名称','开播账号ID（小红书号）','开播时间','直播时长（分钟）'],['演示账号','demo_xhs','2026-06-01',121.4]],
+    '核心数据':[['note'],['直播间曝光人数','直播间观看人数','平均在线人数','人均观看时长（秒）','商品曝光人数','商品点击人数','新增粉丝人数','互动人数','观看-互动率（人数）','直播间观看次数','支付金额','支付人数','支付订单数','客单价','退款金额'],[16000,1150,166,1050,1100,320,6,195,.169,1850,33400,94,123,356,5200]],
+    '流量渠道分析':[['note'],['渠道名称','观看次数','观看人数','人均观看时长（秒）','支付金额','支付订单数','支付人数'],['关注',478,284,1200,9900,29,29],['分享',72,47,2360,7600,21,15],['发现频道',620,414,860,4800,19,19],['直播间上下滑',304,239,42,185,1,1]],
+    '商品分析':[['note'],['商品名称','直播间价格','支付金额','支付件数','商品曝光人数','商品点击人数','退款金额'],['演示商品A',239,12100,23,500,220,538],['演示课程B',1299,7800,6,200,54,200],['演示商品C',198,2380,12,480,110,955]],
+    '观众来源及画像':[['note'],['分类方式','子项','观看人数','下单人数','支付人数','支付金额（商家实收）'],['来源渠道','关注',284,29,29,9900],['','分享',47,15,15,7600],['','发现频道',414,19,19,4800],['粉丝','老粉丝',1014,88,88,31300],['','非粉丝',124,5,5,1810],['','新粉丝',6,1,1,320],['性别','女性',919,80,80,31350],['','男性',197,6,6,1250],['','其他',28,3,3,830],['年龄段','>40',282,32,32,10880],['','36-40',239,25,25,9410],['','25-30',193,16,16,5130],['','31-35',168,8,8,2210],['地区','广东',154,16,16,6570],['','北京',110,10,10,5750],['','浙江',134,8,8,3090],['','上海',98,4,4,1800]],
+    '引流笔记':[['note'],['笔记ID','笔记标题','作者名称','作者小红书号','发布时间','是否关联预告','笔记阅读数','引流观播次数','引流观看人数','引流支付金额','引流支付件数','引流支付订单数','阅读-观播率（次数）','观看-支付转化率（次数）'],['n1','演示内容A：预热笔记','演示账号','demo_xhs','2026-05-28 13:23:47','否',18,4,4,127,2,2,.222,.5],['n2','演示内容B：选品清单','演示账号','demo_xhs','2026-05-20 15:02:11','否',83,5,4,0,0,0,.06,0],['n3','演示内容C：知识科普','演示账号','demo_xhs','2026-05-26 20:30:02','否',3,2,2,0,0,0,.667,0]]
+  }},
+  {name:'sample_live_2026-06-06.xlsx',sheets:{
+    '基本信息':[['note'],['开播账号名称','开播账号ID（小红书号）','开播时间','直播时长（分钟）'],['演示账号','demo_xhs','2026-06-06',118.7]],
+    '核心数据':[['note'],['直播间曝光人数','直播间观看人数','平均在线人数','人均观看时长（秒）','商品曝光人数','商品点击人数','新增粉丝人数','互动人数','观看-互动率（人数）','直播间观看次数','支付金额','支付人数','支付订单数','客单价','退款金额'],[13300,1090,120,760,880,210,3,146,.134,1660,4590,41,52,112,0]],
+    '流量渠道分析':[['note'],['渠道名称','观看次数','观看人数','人均观看时长（秒）','支付金额','支付订单数','支付人数'],['其他',30,23,1320,1310,7,7],['群聊',48,29,1260,1120,6,6],['发现频道',590,391,520,1000,9,9],['关注',420,288,840,843,6,6]],
+    '商品分析':[['note'],['商品名称','直播间价格','支付金额','支付件数','商品曝光人数','商品点击人数','退款金额'],['演示商品C',198,1580,8,420,92,0],['演示商品A',239,1430,6,390,84,0],['演示引流品D',9.9,198,20,680,120,0]],
+    '观众来源及画像':[['note'],['分类方式','子项','观看人数','下单人数','支付人数','支付金额（商家实收）'],['来源渠道','其他',23,7,7,1310],['','群聊',29,6,6,1120],['','发现频道',391,9,9,1000],['粉丝','老粉丝',908,41,41,4590],['','非粉丝',181,0,0,0],['','新粉丝',0,0,0,0],['性别','女性',870,40,40,4390],['','男性',189,1,1,198],['','其他',30,0,0,0],['年龄段','>40',264,18,18,2406],['','36-40',204,9,9,1130],['','未知',114,5,5,565],['','25-30',166,3,3,320],['地区','上海',102,8,8,1134],['','湖北',56,7,7,965],['','山东',59,6,6,925],['','广东',132,2,2,132]],
+    '引流笔记':[['note'],['笔记ID','笔记标题','作者名称','作者小红书号','发布时间','是否关联预告','笔记阅读数','引流观播次数','引流观看人数','引流支付金额','引流支付件数','引流支付订单数','阅读-观播率（次数）','观看-支付转化率（次数）'],['m1','演示内容D：品牌故事','演示账号','demo_xhs','2026-06-03 14:09:44','否',101,40,32,0,0,0,.396,0],['m2','演示内容E：调理思路','演示账号','demo_xhs','2026-06-01 12:00:00','否',17,9,8,0,0,0,.529,0],['m3','演示内容F：用户问题','演示账号','demo_xhs','2026-06-02 10:30:00','否',29,8,8,0,0,0,.276,0]]
+  }}
+])}
+</script>
+</body>
+</html>
